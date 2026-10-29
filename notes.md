@@ -1,0 +1,41 @@
+# Notes
+
+## Tokens
+
+### Keywords
+
+|Keyword |Token      |Regex  |
+|--------|-----------|-------|
+|class   |CLASS      |class  |
+|public  |PUBLIC     |public |
+|static  |STATIC     |static |
+|void    |VOID       |void   |
+|int     |INT        |int    |
+|float   |FLOAT      |float  |
+|boolean |BOOLEAN    |boolean|
+|char    |CHAR       |char   |
+|String  |STRING_TYPE|String |
+|if      |IF         |if     |
+|else    |ELSE       |else   |
+|while   |WHILE      |while  |
+|for     |FOR        |for    |
+|return  |RETURN     |return |
+
+### Other Tokens
+
+|Type                 |Token     |Regex                   |
+|---------------------|----------|------------------------|
+|Identifier           |ID        |`[a-zA-Z_][a-zA-Z0-9_]*`|
+|Number               |NUMBER    |`[1-9][0-9]*(\.[0-9]+)?`|
+|String               |STRING    |`\"(.*)\" \| \'(.*)\'`  |
+|Boolean              |BOOLEAN   |`true \| false`         |
+|Left parenthesis     |LPAR      |(                       |
+|Right parenthesis    |RPAR      |)                       |
+|Left curly Bracket   |LCUR      |{                       |
+|Right curly Bracket  |RCUR      |}                       |
+|Left square Bracket  |LSQU      |[                       |
+|Right square bracket |RSQU      |]                       |
+|Semicolon            |SEMICOLON |;                       |
+|Comma                |COMMA     |,                       |
+|Dot                  |DOT       |.                       |
+|Comment (ignored)    |COMMENT   |`(//.*) \| (/\*.*\*/)`  |
