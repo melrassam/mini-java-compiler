@@ -23,7 +23,7 @@ class DFA:
 
     states = {}
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-      state =  State(id=row[1].value, isStart=row[1].value.startswith("->"), isFinal=row[1].value.startswith("*"))
+      state =  State(id=row[1].value, isStart=row[0].value != None and row[0].value.startswith("->"), isFinal=row[0].value != None and row[0].value.startswith("*"))
       states[state.id] = state
       if state.isStart:
         self.start_state = state
@@ -32,11 +32,16 @@ class DFA:
       state_id = row[1].value
       state = states[state_id]
       transitions = []
-      for col in range(2, ws.max_column + 1):
-        symbol = ws.cell(row=1, column=col).value
+      for col in range(2, ws.max_column):
+        symbol = ws.cell(row=1, column=col + 1).value
         to_state_id = row[col].value
         if to_state_id != '-' and to_state_id != '' and to_state_id is not None:
           to_state = states[to_state_id]
           transition = Transition(from_state=state, to_state=to_state, symbol=symbol)
           transitions.append(transition)
       state.transitions = transitions
+
+# dfa = DFA(start_state=None)
+# dfa.from_transition_table()
+# print(f"Start State: {dfa.start_state.id}")
+# print(f"Transitions from Start State: {[f'{t.symbol} -> {t.to_state.id}' for t in dfa.start_state.transitions]}")
