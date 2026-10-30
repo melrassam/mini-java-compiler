@@ -193,7 +193,7 @@ class LexicalAnalyzer:
             }
             if lexeme in ("true", "false"):
                 attributes["value"] = (lexeme == "true")
-            if token_type == "IDENTIFIER":
+            if token_type == "ID":
                 attributes["symbol"] = self.symbol_table.add(
                     lexeme, line, column
                 )
