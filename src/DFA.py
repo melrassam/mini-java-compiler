@@ -120,12 +120,11 @@ class DFAExecutor:
                 last_match = DFAMatch(i + 1, current_state)
         return last_match
 
-dfa = DFA(None)
-dfa.from_transition_table()
-
-executor = DFAExecutor(dfa)
-
-print(executor.execute("int"))              # True
-print(executor.execute("int count"))        # False
-print(executor.match_longest("int count").end)  # 3
-print(executor.match_longest(">= 5").end)      # 2
+if __name__ == "__main__":
+  dfa = DFA(None)
+  dfa.from_transition_table()
+  executor = DFAExecutor(dfa)
+  print(executor.execute("int"))              # True
+  print(executor.execute("int count"))        # False
+  print(executor.match_longest("int count").end)  # 3
+  print(executor.match_longest(">= 5").end)      # 2

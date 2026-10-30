@@ -84,18 +84,14 @@ class MinimizationLoop:
     minimized_dfa.alphabet = original_dfa.alphabet.copy()
     return minimized_dfa
 
-
-dfa = DFA(None)
-dfa.from_transition_table()
-
-ml = MinimizationLoop()
-ml.create_initial_groups(dfa)
-ml.minimize(dfa.alphabet)
-
-minimized_dfa = ml.build_minimized_dfa(dfa)
-
-print("Equivalence classes:")
-for group in ml.stateGroups:
-    print(f"{group.id}: {[s.id for s in group.states]}")
-
-print(f"Minimized start state: {minimized_dfa.start_state.id}")
+if __name__ == "__main__":
+  dfa = DFA(None)
+  dfa.from_transition_table()
+  ml = MinimizationLoop()
+  ml.create_initial_groups(dfa)
+  ml.minimize(dfa.alphabet)
+  minimized_dfa = ml.build_minimized_dfa(dfa)
+  print("Equivalence classes:")
+  for group in ml.stateGroups:
+      print(f"{group.id}: {[s.id for s in group.states]}")
+  print(f"Minimized start state: {minimized_dfa.start_state.id}")
