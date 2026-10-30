@@ -96,7 +96,6 @@ class DFAExecutor:
                     self.live_states.add(previous)
                     queue.append(previous)
 
-<<<<<<< Updated upstream
     def execute(self, input_string: str) -> bool:
         current_state = self.dfa.start_state
         for symbol in input_string:
