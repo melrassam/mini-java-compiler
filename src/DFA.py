@@ -1,6 +1,5 @@
 from collections import defaultdict, deque
 from dataclasses import dataclass
-
 class State:
   def __init__(self, id: str, isStart: bool = False, isFinal: bool = False, transitions: list = None):
     self.id = id
@@ -97,6 +96,7 @@ class DFAExecutor:
                     self.live_states.add(previous)
                     queue.append(previous)
 
+<<<<<<< Updated upstream
     def execute(self, input_string: str) -> bool:
         current_state = self.dfa.start_state
         for symbol in input_string:
