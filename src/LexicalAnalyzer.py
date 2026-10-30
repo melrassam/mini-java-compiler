@@ -15,7 +15,7 @@ KEYWORDS = {
     "void": "VOID",
     "int": "INT",
     "float": "FLOAT",
-    "boolean": "BOOLEAN",
+    "boolean": "BOOLEAN_TYPE",
     "char": "CHAR",
     "String": "STRING_TYPE",
     "if": "IF",
@@ -23,7 +23,6 @@ KEYWORDS = {
     "while": "WHILE",
     "for": "FOR",
     "return": "RETURN",
-    "main": "MAIN",
     "true": "BOOLEAN",
     "false": "BOOLEAN",
 }
@@ -100,7 +99,7 @@ class LexicalAnalyzer:
         if lexeme[0].isdigit():
             return "NUMBER"
         if lexeme[0].isalpha() or lexeme[0] == "_":
-            return "IDENTIFIER"
+            return "ID"
         return None
     def tokenize(self, output_file_path=None) -> list[Token]:
         source = Path(self.file_path).read_text(encoding="utf-8")

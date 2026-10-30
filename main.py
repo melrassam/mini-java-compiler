@@ -3,7 +3,7 @@ from src.LexicalAnalyzer import LexicalAnalyzer
 
 if __name__ == "__main__":
     lexer = LexicalAnalyzer("data/main.mjava")
-    tokens = lexer.tokenize()
+    tokens = lexer.tokenize("data/tokens.json")
     print("\nTOKENS:")
     for token in tokens:
         line = token.attributes["line"]
