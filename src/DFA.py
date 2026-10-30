@@ -52,6 +52,23 @@ class DFA:
             if symbol not in existing:
                 state.transitions.append(Transition(state, sink, symbol))
 
+class DFAExecutor:
+  def __init__(self, dfa: DFA):
+    self.dfa = dfa
+
+  def execute(self, input_string: str) -> bool:
+    current_state = self.dfa.start_state
+    for symbol in input_string:
+      transition_found = False
+      for transition in current_state.transitions:
+        if transition.symbol == symbol:
+          current_state = transition.to_state
+          transition_found = True
+          break
+      if not transition_found:
+        return False
+    return current_state.isFinal
+
 # dfa = DFA(start_state=None)
 # dfa.from_transition_table()
 # print(f"Start State: {dfa.start_state.id}")
