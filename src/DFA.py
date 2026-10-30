@@ -14,12 +14,15 @@ class Transition:
 class DFA:
   def __init__(self, start_state: State):
     self.start_state = start_state
+    self.alphabet = []
 
   def from_transition_table(self, xlsx_path = "./dfa-transitions.xlsx"):
     from openpyxl import load_workbook
 
     wb = load_workbook(xlsx_path)
     ws = wb.active
+
+    self.alphabet = [ws.cell(row=1, column=col).value for col in range(3, ws.max_column + 1)]
 
     states = {}
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
@@ -40,6 +43,14 @@ class DFA:
           transition = Transition(from_state=state, to_state=to_state, symbol=symbol)
           transitions.append(transition)
       state.transitions = transitions
+
+    sink = State("__SINK__")
+    sink.transitions = [Transition(sink, sink, symbol) for symbol in self.alphabet]
+    for state in states.values():
+        existing = {t.symbol for t in state.transitions}
+        for symbol in self.alphabet:
+            if symbol not in existing:
+                state.transitions.append(Transition(state, sink, symbol))
 
 # dfa = DFA(start_state=None)
 # dfa.from_transition_table()
