@@ -1,12 +1,20 @@
-from src.LexicalAnalyzer import LexicalAnalyzer
-from src.SemanticAnalyzer import SemanticAnalyzer
-from src.SemanticAnalyzer import SemanticAnalyzer
 
+from src.LexicalAnalyzer import LexicalAnalyzer
 
 if __name__ == "__main__":
-  # read Mini Java file path (defaults to data/main.mjava)
-  # pass the path to the lexical analyzer
-  # pass the result to the syntax analyzer
-  # pass the result to the semantic analyzer
-  lexer = LexicalAnalyzer("data/main.mjava")
-  lexer.tokenize()
+    lexer = LexicalAnalyzer("data/main.mjava")
+    tokens = lexer.tokenize()
+    print("\nTOKENS:")
+    for token in tokens:
+        line = token.attributes["line"]
+        column = token.attributes["column"]
+        print(
+            f"{token.type:<15} {token.text!r:<20} "
+            f"line={line}, column={column}"
+        )
+    print("\nSYMBOL TABLE:")
+    for name, entry in lexer.symbol_table.symbols.items():
+        print(name, entry.occurrences)
+    print("\nLEXICAL ERRORS:")
+    for error in lexer.errors:
+        print(error)

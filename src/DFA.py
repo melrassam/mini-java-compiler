@@ -1,3 +1,6 @@
+from collections import defaultdict, deque
+from dataclasses import dataclass
+
 class State:
   def __init__(self, id: str, isStart: bool = False, isFinal: bool = False, transitions: list = None):
     self.id = id
@@ -52,24 +55,77 @@ class DFA:
             if symbol not in existing:
                 state.transitions.append(Transition(state, sink, symbol))
 
+SYMBOL_ALIASES = {
+    "space": " ",
+    "tab": "\t",
+    "new-line": "\n",
+    "apostrophe (')": "'",
+}
+@dataclass(frozen=True)
+class DFAMatch:
+    end: int
+    state: State
 class DFAExecutor:
-  def __init__(self, dfa: DFA):
-    self.dfa = dfa
+    def __init__(self, dfa: DFA):
+        if dfa.start_state is None:
+            raise ValueError("DFA must have a start state")
+        self.dfa = dfa
+        self.transitions = {}
+        reverse = defaultdict(set)
+        stack = [dfa.start_state]
+        # Build transition lookup once
+        while stack:
+            state = stack.pop()
+            if state in self.transitions:
+                continue
+            moves = {}
+            for transition in state.transitions:
+                symbol = SYMBOL_ALIASES.get(transition.symbol, transition.symbol)
+                if symbol in moves and moves[symbol] is not transition.to_state:
+                    raise ValueError(f"Nondeterministic transition: {state.id}, {symbol!r}")
+                moves[symbol] = transition.to_state
+                reverse[transition.to_state].add(state)
+                stack.append(transition.to_state)
+            self.transitions[state] = moves
+        # Find all states that can eventually reach a final state
+        self.live_states = {state for state in self.transitions if state.isFinal}
+        queue = deque(self.live_states)
+        while queue:
+            state = queue.popleft()
+            for previous in reverse[state]:
+                if previous not in self.live_states:
+                    self.live_states.add(previous)
+                    queue.append(previous)
 
-  def execute(self, input_string: str) -> bool:
-    current_state = self.dfa.start_state
-    for symbol in input_string:
-      transition_found = False
-      for transition in current_state.transitions:
-        if transition.symbol == symbol:
-          current_state = transition.to_state
-          transition_found = True
-          break
-      if not transition_found:
-        return False
-    return current_state.isFinal
+    def execute(self, input_string: str) -> bool:
+        current_state = self.dfa.start_state
+        for symbol in input_string:
+            current_state = self.transitions[current_state].get(symbol)
+            if current_state is None:
+                return False
+        return current_state.isFinal
 
-# dfa = DFA(start_state=None)
-# dfa.from_transition_table()
-# print(f"Start State: {dfa.start_state.id}")
-# print(f"Transitions from Start State: {[f'{t.symbol} -> {t.to_state.id}' for t in dfa.start_state.transitions]}")
+    def match_longest(self, source: str, start: int = 0) -> DFAMatch | None:
+        if not 0 <= start <= len(source):
+            raise ValueError("Invalid starting position")
+        current_state = self.dfa.start_state
+        last_match = (DFAMatch(start, current_state) if current_state.isFinal else None)
+        for i in range(start, len(source)):
+            symbol = source[i]
+            next_state = self.transitions[current_state].get(symbol)
+            if next_state is None or next_state not in self.live_states:
+                break
+            current_state = next_state
+            if current_state.isFinal:
+                last_match = DFAMatch(i + 1, current_state)
+        return last_match
+
+dfa = DFA(None)
+dfa.from_transition_table()
+
+executor = DFAExecutor(dfa)
+
+print(executor.execute("int"))              # True
+print(executor.execute("int count"))        # False
+print(executor.match_longest("int count").end)  # 3
+print(executor.match_longest(">= 5").end)      # 2
