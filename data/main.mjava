@@ -20,4 +20,5 @@ int main()
   */
   String test = "This is a test string";
   String test2 = "This is a faulty string;
+  *//*
 }
