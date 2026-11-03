@@ -95,7 +95,7 @@ class MinimizationLoop:
     }
     new_states = []
     for group in self.stateGroups:
-      new_state = State(id=group.id, isStart=original_dfa.start_state in group.states, isFinal=any(s.isFinal for s in group.states))
+      new_state = State(id=group.id, is_start=original_dfa.start_state in group.states, is_final=any(s.is_final for s in group.states))
       new_states.append(new_state)
     for i, group in enumerate(self.stateGroups):
       representative = group.states[0]
@@ -104,31 +104,31 @@ class MinimizationLoop:
         destination_group = state_to_group[transition.to_state]
         to_state = new_states[destination_group]
         from_state.transitions.append(Transition(from_state, to_state, transition.symbol))
-    start_state = next(s for s in new_states if s.isStart)
+    start_state = next(s for s in new_states if s.is_start)
     minimized_dfa = DFA(start_state)
     minimized_dfa.alphabet = original_dfa.alphabet.copy()
     return minimized_dfa
 
-if __name__ == "__main__":
-  dfa = DFA(None)
-  dfa.from_transition_table()
+# if __name__ == "__main__":
+#   dfa = DFA(None)
+#   dfa.from_transition_table()
 
-  ml = MinimizationLoop()
-  ml.create_initial_groups(dfa)
-  ml.minimize(dfa.alphabet)
+#   ml = MinimizationLoop()
+#   ml.create_initial_groups(dfa)
+#   ml.minimize(dfa.alphabet)
 
-  minimized_dfa = ml.build_minimized_dfa(dfa)
+#   minimized_dfa = ml.build_minimized_dfa(dfa)
 
-  print("Equivalence classes:")
+#   print("Equivalence classes:")
 
-  if ml.stateGroups is None:
-    print("Invalid stateGroups")
-    sys.exit(1)
-  if minimized_dfa.start_state is None:
-    print("Invalid start state")
-    sys.exit(1)
+#   if ml.stateGroups is None:
+#     print("Invalid stateGroups")
+#     sys.exit(1)
+#   if minimized_dfa.start_state is None:
+#     print("Invalid start state")
+#     sys.exit(1)
 
-  for group in ml.stateGroups:
-    print(f"{group.id}: {[s.id for s in group.states]}")
+#   for group in ml.stateGroups:
+#     print(f"{group.id}: {[s.id for s in group.states]}")
 
-  print(f"Minimized start state: {minimized_dfa.start_state.id}")
+#   print(f"Minimized start state: {minimized_dfa.start_state.id}")

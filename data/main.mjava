@@ -1,1 +1,11 @@
-"this is a '
+class Main()
+{
+  public static void main()
+  {
+    // my first program
+    System.out.1println("Hello, from MiniJava\n");
+    /*
+      multi-line
+    */
+  }
+}

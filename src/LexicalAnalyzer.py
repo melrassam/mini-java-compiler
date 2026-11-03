@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from src.Token import Token
 from src.DFA import DFA, DFAExecutor
 from src.SymbolTable import SymbolTable, SymbolEntry
-
+from src.DFAMinimization import MinimizationLoop
 
 KEYWORDS = {
   "class": "CLASS",
@@ -79,7 +79,12 @@ class LexicalAnalyzer:
         str(root / "dfa-transitions.xlsx")
       )
 
-    self.executor = DFAExecutor(dfa)
+    ml = MinimizationLoop()
+    ml.create_initial_groups(dfa)
+    ml.minimize(dfa.alphabet)
+    minimized_dfa = ml.build_minimized_dfa(dfa)
+
+    self.executor = DFAExecutor(minimized_dfa)
     self.symbol_table = SymbolTable()
     self.errors: list[LexicalError] = []
 
