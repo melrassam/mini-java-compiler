@@ -1,42 +1,60 @@
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 from src.DFA import DFA, State, Transition
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 class StateGroup:
   def __init__(self, id: str, states: list):
     self.id = id
     self.states = states
+
   def __str__(self):
     return f"StateGroup(id={self.id}, states={self.states})"
 
+
 class MinimizationLoop:
-  def __init__(self, stateGroups: list = None):
+  def __init__(self, stateGroups: list | None = None):
     self.stateGroups = stateGroups
+
   def __str__(self):
     return f"MinimizationLoop(stateGroups={self.stateGroups})"
+
   def create_initial_groups(self, dfa: DFA):
     final_states = []
     non_final_states = []
+
     def recursive_grouping(state: State):
-      if state.isFinal:
+      if state.is_final:
         final_states.append(state)
       else:
         non_final_states.append(state)
       for transition in state.transitions:
-        if transition.to_state not in final_states and transition.to_state not in non_final_states:
+        if transition.to_state not in (final_states + non_final_states):
           recursive_grouping(transition.to_state)
+
+    if dfa.start_state is None:
+      print("Invalid DFA")
+      sys.exit(1)
+
     recursive_grouping(dfa.start_state)
     self.stateGroups = [StateGroup("Final States", final_states), StateGroup("Non-Final States", non_final_states)]
 
   def get_containing_group(self, state: State):
+    if self.stateGroups is None:
+      print("Invalid stateGroups")
+      sys.exit(1)
+
     for group in self.stateGroups:
       if state in group.states:
         return group
     return None
 
   def rebuild_groups(self, alphabet):
+    if self.stateGroups is None:
+      print("Invalid stateGroups")
+      sys.exit(1)
+
     group_of = {
       state: i
       for i, group in enumerate(self.stateGroups)
@@ -53,8 +71,11 @@ class MinimizationLoop:
           new_groups.append(StateGroup(f"G{len(new_groups)}", states))
     self.stateGroups = new_groups
 
-
   def minimize(self, alphabet):
+    if self.stateGroups is None:
+      print("Invalid stateGroups")
+      sys.exit(1)
+
     while True:
       previous_count = len(self.stateGroups)
       self.rebuild_groups(alphabet)
@@ -63,6 +84,10 @@ class MinimizationLoop:
     return self.stateGroups
 
   def build_minimized_dfa(self, original_dfa: DFA):
+    if self.stateGroups is None:
+      print("Invalid stateGroups")
+      sys.exit(1)
+
     state_to_group = {
       state: i
       for i, group in enumerate(self.stateGroups)
@@ -87,11 +112,23 @@ class MinimizationLoop:
 if __name__ == "__main__":
   dfa = DFA(None)
   dfa.from_transition_table()
+
   ml = MinimizationLoop()
   ml.create_initial_groups(dfa)
   ml.minimize(dfa.alphabet)
+
   minimized_dfa = ml.build_minimized_dfa(dfa)
+
   print("Equivalence classes:")
+
+  if ml.stateGroups is None:
+    print("Invalid stateGroups")
+    sys.exit(1)
+  if minimized_dfa.start_state is None:
+    print("Invalid start state")
+    sys.exit(1)
+
   for group in ml.stateGroups:
-      print(f"{group.id}: {[s.id for s in group.states]}")
+    print(f"{group.id}: {[s.id for s in group.states]}")
+
   print(f"Minimized start state: {minimized_dfa.start_state.id}")

@@ -5,6 +5,10 @@ from src.Token import Token
 
 
 def print_tokens(tokens: list[Token]):
+  if len(tokens) == 0:
+    print("No tokens found")
+    return
+
   for token in tokens:
     line = token.attributes["line"]
     column = token.attributes["column"]
@@ -25,11 +29,13 @@ if __name__ == "__main__":
   lexer = LexicalAnalyzer("data/main.mjava")
   tokens = lexer.tokenize("data/tokens.json")
 
-  print("\nTOKENS:")
+  print("TOKENS:")
   print_tokens(tokens)
 
-  print("\nSYMBOL TABLE:")
-  print_symbol_table(lexer.symbol_table)
+  if not lexer.symbol_table.is_empty():
+    print("\nSYMBOL TABLE:")
+    print_symbol_table(lexer.symbol_table)
 
-  print("\nLEXICAL ERRORS:")
-  print_errors(lexer.errors)
+  if len(lexer.errors) > 0:
+    print("\nLEXICAL ERRORS:")
+    print_errors(lexer.errors)

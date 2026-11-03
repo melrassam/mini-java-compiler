@@ -24,3 +24,6 @@ class SymbolTable:
 
   def lookup(self, name: str) -> SymbolEntry | None:
     return self.symbols.get(name)
+
+  def is_empty(self):
+    return len(self.symbols.keys()) == 0

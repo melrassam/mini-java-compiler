@@ -1,8 +1,6 @@
-
-import json
+import json, re
 from pathlib import Path
 from dataclasses import dataclass
-
 from src.Token import Token
 from src.DFA import DFA, DFAExecutor
 from src.SymbolTable import SymbolTable, SymbolEntry
@@ -98,11 +96,11 @@ class LexicalAnalyzer:
       str | None: returns the token type as a string or None
     """
 
-    if lexeme.startswith("//") or (lexeme.startswith("/*") and lexeme.endswith("*/")):
-      return "COMMENT"
-
     if len(lexeme) > 0 and lexeme.strip() == "":
       return "SPACE"
+
+    if lexeme.startswith("//") or (lexeme.startswith("/*") and lexeme.endswith("*/")):
+      return "COMMENT"
 
     if lexeme in KEYWORDS:
       return KEYWORDS[lexeme]
@@ -176,31 +174,15 @@ class LexicalAnalyzer:
         column += len(segment)
       offset = end
 
-    def error(message: str):
+    def add_error(message: str):
       self.errors.append(LexicalError(message, line, column))
 
     while offset < n:
       char = source[offset]
-      # if char.isspace():
-      #   end = offset + 1
-      #   while end < n and source[end].isspace():
-      #     end += 1
-      #   advance(end)
-      #   continue
-
-      # if source.startswith("//", offset):
-      #   end = source.find("\n", offset + 2)
-      #   advance(n if end == -1 else end)
-      #   continue
 
       if source.startswith("/*", offset):
-        end = source.find("*/", offset + 2)
-        if end == -1:
-          error("unterminated multi-line comment")
-          advance(n)
-        else:
-          advance(end + 2)
-        continue
+        if source.find("*/", offset + 2) == -1:
+          add_error("unterminated multi-line comment")
 
       if char in ('"', "'"):
         newline = source.find("\n", offset + 1)
@@ -209,15 +191,17 @@ class LexicalAnalyzer:
           closing_quote == -1
           or (newline != -1 and newline < closing_quote)
         ):
-          error("unclosed string literal")
-          advance(n if newline == -1 else newline)
+          add_error("unclosed string literal")
+          advance(offset + 1)
           continue
 
       match = self.executor.match_longest(source, offset)
+
       if match is None or match.end == offset:
-        error(f"invalid character {char!r}")
+        add_error(f"invalid character {char!r}")
         advance(offset + 1)
         continue
+
       lexeme = source[offset:match.end]
       if (
         lexeme[0].isdigit()
@@ -234,19 +218,20 @@ class LexicalAnalyzer:
           end += 1
         sequence = source[offset:end]
         if source[match.end].isdigit():
-          error(
+          add_error(
             f"numeric sequence not recognized by DFA {sequence!r}"
           )
         else:
-          error(f"invalid identifier {sequence!r}")
+          add_error(f"invalid identifier {sequence!r}")
         advance(end)
         continue
 
       token_type = self.classify(lexeme)
       if token_type is None:
-        error(f"unrecognized lexeme {lexeme!r}")
+        add_error(f"unrecognized lexeme {lexeme!r}")
         advance(match.end)
         continue
+
       attributes: dict[str, int | bool | SymbolEntry] = {
         "line": line,
         "column": column
@@ -259,9 +244,12 @@ class LexicalAnalyzer:
         attributes["symbol"] = self.symbol_table.add(
           lexeme, line, column
         )
-      tokens.append(
-        Token(lexeme, token_type, attributes)
-      )
+
+      if token_type not in ("COMMENT", "SPACE"):
+        tokens.append(
+          Token(lexeme, token_type, attributes)
+        )
+
       advance(match.end)
 
     if output_file_path:

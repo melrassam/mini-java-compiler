@@ -5,8 +5,8 @@ from dataclasses import dataclass
 class State:
   def __init__(self, id: str, isStart: bool = False, isFinal: bool = False, transitions: list | None = None):
     self.id = id
-    self.isStart = isStart
-    self.isFinal = isFinal
+    self.is_start = isStart
+    self.is_final = isFinal
     self.transitions = transitions if transitions is not None else []
 
 
@@ -43,7 +43,7 @@ class DFA:
         isFinal=row[0].value != None and str(row[0].value).startswith("*")
       )
       states[state.id] = state
-      if state.isStart:
+      if state.is_start:
         self.start_state = state
 
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
@@ -107,7 +107,7 @@ class DFAExecutor:
       self.transitions[state] = moves
 
     # Find all states that can eventually reach a final state
-    self.live_states = {state for state in self.transitions if state.isFinal}
+    self.live_states = {state for state in self.transitions if state.is_final}
     queue = deque(self.live_states)
     while queue:
       state = queue.popleft()
@@ -136,7 +136,7 @@ class DFAExecutor:
     if current_state is None:
       return None;
 
-    last_match = (DFAMatch(start, current_state) if current_state.isFinal else None)
+    last_match = (DFAMatch(start, current_state) if current_state.is_final else None)
 
     for i in range(start, len(source)):
       symbol = source[i]
@@ -144,7 +144,7 @@ class DFAExecutor:
       if next_state is None or next_state not in self.live_states:
         break
       current_state = next_state
-      if current_state.isFinal:
+      if current_state.is_final:
         last_match = DFAMatch(i + 1, current_state)
 
     return last_match
