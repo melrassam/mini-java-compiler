@@ -68,6 +68,71 @@ class DFA:
           state.transitions.append(Transition(state, sink, symbol))
 
 
+  def to_transition_table(self, xlsx_path="minimized-dfa-transitions.xlsx") -> None:
+    from openpyxl import Workbook
+
+    if self.start_state is None:
+      raise ValueError("DFA must have a start state")
+
+    wb = Workbook()
+    ws = wb.active
+    if ws is None:
+      raise ValueError("The worksheet must not be None")
+
+    ws.title = "DFA"
+
+    # Collect all reachable states
+    states = []
+    visited = set()
+    stack = [self.start_state]
+
+    while stack:
+      state = stack.pop()
+
+      if state in visited:
+        continue
+
+      visited.add(state)
+      states.append(state)
+
+      for transition in state.transitions:
+        stack.append(transition.to_state)
+
+    # Header
+    ws.cell(row=1, column=1, value="Mark")
+    ws.cell(row=1, column=2, value="State")
+
+    for col, symbol in enumerate(self.alphabet, start=3):
+      ws.cell(row=1, column=col, value=symbol)
+
+    # State rows
+    for row, state in enumerate(states, start=2):
+
+      # State type
+      if state.is_start:
+        state_type = "->"
+      else:
+        state_type = ""
+
+      if state.is_final:
+        state_type += "*"
+
+      ws.cell(row=row, column=1, value=state_type)
+      ws.cell(row=row, column=2, value=state.id)
+
+      # Transitions
+      transition_map = {
+        transition.symbol: transition.to_state.id
+        for transition in state.transitions
+      }
+
+      for col, symbol in enumerate(self.alphabet, start=3):
+        destination = transition_map.get(symbol, "-")
+        ws.cell(row=row, column=col, value=destination)
+
+    wb.save(xlsx_path)
+
+
 SYMBOL_ALIASES = {
   "space": " ",
   "tab": "\t",

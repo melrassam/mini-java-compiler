@@ -83,6 +83,7 @@ class LexicalAnalyzer:
     ml.create_initial_groups(dfa)
     ml.minimize(dfa.alphabet)
     minimized_dfa = ml.build_minimized_dfa(dfa)
+    minimized_dfa.to_transition_table()
 
     self.executor = DFAExecutor(minimized_dfa)
     self.symbol_table = SymbolTable()
