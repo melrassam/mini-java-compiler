@@ -71,19 +71,21 @@ class LexicalError:
 class LexicalAnalyzer:
   def __init__(self, file_path: str = "data/main.mjava", dfa: DFA | None = None):
     self.file_path = file_path
+    root = Path(__file__).resolve().parents[1]
 
     if dfa is None:
       dfa = DFA(None)
-      root = Path(__file__).resolve().parents[1]
       dfa.from_transition_table(
-        str(root / "dfa-transitions.xlsx")
+        str(root / "tables/dfa-transitions.xlsx")
       )
 
     ml = MinimizationLoop()
     ml.create_initial_groups(dfa)
     ml.minimize(dfa.alphabet)
     minimized_dfa = ml.build_minimized_dfa(dfa)
-    minimized_dfa.to_transition_table()
+    minimized_dfa.to_transition_table(
+      str(root / "tables/minimized-dfa-transitions.xlsx")
+    )
 
     self.executor = DFAExecutor(minimized_dfa)
     self.symbol_table = SymbolTable()

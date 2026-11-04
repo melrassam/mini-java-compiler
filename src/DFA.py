@@ -23,7 +23,7 @@ class DFA:
     self.alphabet = []
 
 
-  def from_transition_table(self, xlsx_path = "dfa-transitions.xlsx") -> None:
+  def from_transition_table(self, xlsx_path = "tables/dfa-transitions.xlsx") -> None:
     from openpyxl import load_workbook
 
     wb = load_workbook(xlsx_path)
@@ -68,7 +68,7 @@ class DFA:
           state.transitions.append(Transition(state, sink, symbol))
 
 
-  def to_transition_table(self, xlsx_path="minimized-dfa-transitions.xlsx") -> None:
+  def to_transition_table(self, xlsx_path="tables/minimized-dfa-transitions.xlsx") -> None:
     from openpyxl import Workbook
 
     if self.start_state is None:
